@@ -12,8 +12,18 @@ export default function UpdateChecker() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await fetch('/api/version');
-        const data = await res.json();
+        const repo = process.env.NEXT_PUBLIC_GITHUB_REPO || 'insushim/iwnoteLM';
+        const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
+          headers: { Accept: 'application/vnd.github.v3+json' },
+        });
+        if (!res.ok) return;
+        const release = await res.json();
+        const apk = release.assets?.find((a: { name: string }) => a.name.endsWith('.apk'));
+        const data = {
+          version: release.tag_name?.replace('v', '') || '',
+          downloadUrl: apk?.browser_download_url || '',
+          releaseNotes: release.body || '',
+        };
         if (data.version && data.version !== CURRENT_VERSION && compareVersions(data.version, CURRENT_VERSION) > 0) {
           setUpdate(data);
         }

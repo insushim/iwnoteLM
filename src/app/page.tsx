@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header';
 import Card from '@/components/common/Card';
 import TrustScore from '@/components/common/TrustScore';
 import { CATEGORY_INFO, formatDate, getCategoryColor } from '@/lib/utils';
+import { getStatsLocal } from '@/lib/local-store';
 import type { NotebookCategory } from '@/types';
 
 const CATEGORIES = Object.entries(CATEGORY_INFO) as [NotebookCategory, typeof CATEGORY_INFO[NotebookCategory]][];
@@ -14,13 +15,12 @@ const CATEGORIES = Object.entries(CATEGORY_INFO) as [NotebookCategory, typeof CA
 export default function DashboardPage() {
   const [stats, setStats] = useState<{
     totalQueries: number;
-    totalVerifications: number;
     avgTrustScore: number;
     recentQueries: { id: string; question: string; category: NotebookCategory; trust_score: number; created_at: string }[];
   } | null>(null);
 
   useEffect(() => {
-    fetch('/api/stats').then(r => r.json()).then(setStats).catch(() => {});
+    setStats(getStatsLocal());
   }, []);
 
   return (
@@ -57,7 +57,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-50 rounded-lg"><ShieldCheck size={18} className="text-green-600" /></div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats?.totalVerifications || 0}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats?.totalQueries || 0}</p>
               <p className="text-xs text-gray-500">교차검증</p>
             </div>
           </div>

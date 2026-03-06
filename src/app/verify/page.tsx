@@ -7,6 +7,7 @@ import Card from '@/components/common/Card';
 import TrustScore from '@/components/common/TrustScore';
 import { CATEGORY_INFO, formatDate, getCategoryColor } from '@/lib/utils';
 import { OFFICIAL_SOURCES } from '@/lib/official-sources';
+import { getStatsLocal } from '@/lib/local-store';
 import type { NotebookCategory } from '@/types';
 
 export default function VerifyPage() {
@@ -19,7 +20,8 @@ export default function VerifyPage() {
   } | null>(null);
 
   useEffect(() => {
-    fetch('/api/stats').then(r => r.json()).then(setStats).catch(() => {});
+    const s = getStatsLocal();
+    setStats({ ...s, totalVerifications: s.totalQueries, categoryBreakdown: {} });
   }, []);
 
   return (

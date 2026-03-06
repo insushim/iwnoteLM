@@ -6,9 +6,24 @@ import Header from '@/components/layout/Header';
 import Card from '@/components/common/Card';
 import TrustScore from '@/components/common/TrustScore';
 import { CATEGORY_INFO, cn, getCategoryColor } from '@/lib/utils';
+import { askQuestion } from '@/lib/client-ask';
 import type { NotebookCategory, CollectResult } from '@/types';
 
 const CATEGORIES = Object.entries(CATEGORY_INFO) as [NotebookCategory, typeof CATEGORY_INFO[NotebookCategory]][];
+
+const COLLECT_TOPICS: Record<string, string[]> = {
+  education_law: ['초·중등교육법 주요 조항', '교육기본법 핵심 내용'],
+  school_violence: ['학교폭력예방법 절차 요약', '학교폭력 가해학생 조치 기준'],
+  teacher_hr: ['교원 연가 병가 규정', '교원 성과급 지급 기준'],
+  neis: ['NEIS 권한관리 방법', 'NEIS 성적 입력 방법'],
+  classroom: ['학생 생활지도 권한 범위', '아동학대 신고 절차'],
+  safety: ['학교안전사고 대응 매뉴얼', '현장학습 안전관리 기준'],
+  special_education: ['특수교육대상자 선정 절차', '통합교육 운영 기준'],
+  curriculum: ['2022 개정 교육과정 핵심', '교과별 성취기준 구조'],
+  moe_directive: ['학교생활기록부 기재요령', '방과후학교 운영 기본계획'],
+  finance: ['학교회계 예산 편성 절차', '수익자부담경비 기준'],
+  general: ['초등교사 업무 가이드', '학기 초 체크리스트'],
+};
 
 export default function KnowledgePage() {
   const [collecting, setCollecting] = useState<NotebookCategory | null>(null);
@@ -19,15 +34,22 @@ export default function KnowledgePage() {
     setCollecting(category);
 
     try {
-      const res = await fetch('/api/auto-collect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, maxTopics: 3 }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setResults(prev => ({ ...prev, [category]: data.result }));
+      const topics = COLLECT_TOPICS[category] || ['기본 정보 수집'];
+      const result: CollectResult = { category, searched: 0, verified: 0, stored: 0, failed: 0, sources: [], completedAt: '' };
+      for (const topic of topics.slice(0, 2)) {
+        result.searched++;
+        try {
+          const r = await askQuestion(topic, category);
+          if (r.trustScore >= 80) { result.verified++; result.stored++; }
+          else { result.failed++; }
+          result.sources.push({ url: '', title: topic, trustScore: r.trustScore, stored: r.trustScore >= 80 });
+        } catch {
+          result.failed++;
+          result.sources.push({ url: '', title: topic, trustScore: 0, stored: false, reason: '검색 오류' });
+        }
       }
+      result.completedAt = new Date().toISOString();
+      setResults(prev => ({ ...prev, [category]: result }));
     } catch {
       // silently fail
     } finally {

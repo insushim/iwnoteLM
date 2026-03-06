@@ -8,6 +8,8 @@ import Card from '@/components/common/Card';
 import TrustScore from '@/components/common/TrustScore';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { CATEGORY_INFO, cn, getCategoryColor } from '@/lib/utils';
+import { askQuestion } from '@/lib/client-ask';
+import { saveQueryLocal } from '@/lib/local-store';
 import { marked } from 'marked';
 import type { NotebookCategory, AskResponse, AnswerSource } from '@/types';
 
@@ -53,21 +55,11 @@ function AskPage() {
     setResult(null);
 
     try {
-      const res = await fetch('/api/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, category, mode: 'auto' }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || '요청 실패');
-      }
-
-      const data: AskResponse = await res.json();
+      const data = await askQuestion(question, category);
       setResult(data);
+      saveQueryLocal(question, category, data.trustScore);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '오류가 발생했습니다.');
+      setError(err instanceof Error ? err.message : '오류가 발생했습니다. API 키를 확인해주세요.');
     } finally {
       setLoading(false);
     }

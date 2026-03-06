@@ -1,7 +1,6 @@
 /**
- * Gemini 2.5 Flash API
+ * Gemini 2.5 Flash API (클라이언트 + 서버 겸용)
  * 무료 티어: 10 RPM, 250,000 TPM, 250 RPD
- * 성능 좋고 무료 할당량 충분. 1M 컨텍스트 윈도우.
  */
 
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
@@ -16,7 +15,10 @@ export async function callGemini(
   messages: GeminiMessage[],
   maxTokens: number = 4096
 ): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = typeof window !== 'undefined'
+    ? process.env.NEXT_PUBLIC_GEMINI_API_KEY
+    : process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
   if (!apiKey) throw new Error('GEMINI_API_KEY가 설정되지 않았습니다.');
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
