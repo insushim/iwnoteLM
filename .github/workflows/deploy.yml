@@ -5,6 +5,11 @@ on:
     branches: [main]
     tags: ['v*']
 
+env:
+  NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  NEXT_PUBLIC_APP_VERSION: ${{ github.ref_name }}
+  NEXT_PUBLIC_GITHUB_REPO: insushim/iwnoteLM
+
 jobs:
   # 1. Deploy to Cloudflare Pages
   deploy-web:
@@ -25,7 +30,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .next --project-name=edubrain
+          command: pages deploy out --project-name=edubrain --branch main --commit-dirty=true
 
   # 2. Build APK (only on tags)
   build-apk:
@@ -50,7 +55,6 @@ jobs:
         run: |
           cd android
           sed -i "s/versionName \".*\"/versionName \"${{ steps.version.outputs.VERSION }}\"/" app/build.gradle
-          # Increment versionCode
           CURRENT_CODE=$(grep 'versionCode' app/build.gradle | head -1 | tr -dc '0-9')
           NEW_CODE=$((CURRENT_CODE + 1))
           sed -i "s/versionCode $CURRENT_CODE/versionCode $NEW_CODE/" app/build.gradle
@@ -69,21 +73,15 @@ jobs:
       - name: Sign APK
         run: |
           cd android
-          # Use debug keystore for now - replace with release keystore in production
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
             keytool -genkey -v -keystore "$HOME/.android/debug.keystore" \
               -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass android -keypass android \
               -dname "CN=Android Debug,O=Android,C=US"
           fi
-
           APK="app/build/outputs/apk/release/app-release-unsigned.apk"
           SIGNED_APK="app/build/outputs/apk/release/EduBrain-v${{ steps.version.outputs.VERSION }}.apk"
-
-          # Align
           ${ANDROID_HOME}/build-tools/34.0.0/zipalign -v -p 4 "$APK" "${APK}.aligned"
-
-          # Sign
           ${ANDROID_HOME}/build-tools/34.0.0/apksigner sign \
             --ks "$HOME/.android/debug.keystore" \
             --ks-pass pass:android \
@@ -124,9 +122,6 @@ jobs:
           name: "EduBrain v${{ steps.version.outputs.VERSION }}"
           body: |
             ## EduBrain v${{ steps.version.outputs.VERSION }}
-
-            ### 변경사항
-            - 자동 릴리스
 
             ### 설치 방법
             **Android**: 아래 APK 파일을 다운로드하여 설치하세요.
