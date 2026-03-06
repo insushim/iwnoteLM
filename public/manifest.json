@@ -1,0 +1,29 @@
+{
+  "name": "EduBrain - 초등교사 AI 자문",
+  "short_name": "EduBrain",
+  "description": "공식 사이트 5곳+ 교차검증으로 정확한 교육법령·업무 답변을 제공하는 AI 시스템",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "lang": "ko"
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#3b82f6"/>
+  <text x="96" y="72" text-anchor="middle" font-size="40" font-weight="bold" fill="white" font-family="Arial">Edu</text>
+  <text x="96" y="120" text-anchor="middle" font-size="40" font-weight="bold" fill="white" font-family="Arial">Brain</text>
+  <text x="96" y="155" text-anchor="middle" font-size="18" fill="#93c5fd" font-family="Arial">AI</text>
+</svg>
