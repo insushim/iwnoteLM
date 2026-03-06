@@ -49,3 +49,4 @@ dist/
 
 # cloudflare
 .wrangler/
+.open-next/

@@ -1,5 +1,5 @@
-import { OFFICIAL_SOURCES, getSourcesForCategory } from './official-sources';
-import { callClaude } from './claude-api';
+import { getSourcesForCategory } from './official-sources';
+import { callGemini } from './gemini-api';
 import type {
   CrossVerifyRequest,
   VerificationResult,
@@ -49,7 +49,7 @@ async function searchOfficialSources(
 카테고리: ${category}
 
 검색 대상 공식 사이트:
-${targetSources.map((s, i) => `${i + 1}. ${s.name} (${s.url}) [신뢰등급: ${s.trustLevel}]`).join('\n')}
+${targetSources.map((s, i) => `${i + 1}. ${s.name} (${s.url}) [신뢰등급: ${s.trustLevel}] [ID: ${s.id}]`).join('\n')}
 
 반드시 다음 JSON 형식으로만 응답하세요 (마크다운 코드블록 없이):
 {
@@ -74,7 +74,7 @@ ${targetSources.map((s, i) => `${i + 1}. ${s.name} (${s.url}) [신뢰등급: ${s
 - 찾을 수 없는 정보는 isRelevant: false로 표시하세요
 - 추측이나 추론은 절대 하지 마세요`;
 
-  const response = await callClaude(searchPrompt, [
+  const response = await callGemini(searchPrompt, [
     { role: 'user', content: `위 공식 사이트들에서 "${question}"에 대한 정확한 정보를 검색해주세요.` }
   ], 8192);
 
@@ -155,7 +155,7 @@ URL: ${r.url}
   "confidence": "high"
 }`;
 
-  const response = await callClaude(verifyPrompt, [
+  const response = await callGemini(verifyPrompt, [
     { role: 'user', content: '위 정보를 교차검증하고 신뢰도를 평가해주세요.' }
   ], 8192);
 
